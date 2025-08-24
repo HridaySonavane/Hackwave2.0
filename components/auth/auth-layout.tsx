@@ -1,10 +1,54 @@
 "use client";
-
 import type React from "react";
-
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Target } from "lucide-react";
+import { ArrowLeft, Brain, Target, Moon, Sun } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+function ThemeToggle() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (
+      savedTheme === "dark" ||
+      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    }
+    setIsDarkMode(!isDarkMode);
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      className="w-9 h-9 text-slate-600 hover:text-slate-800 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+    >
+      {isDarkMode ? (
+        <Sun className="h-[1.2rem] w-[1.2rem]" />
+      ) : (
+        <Moon className="h-[1.2rem] w-[1.2rem]" />
+      )}
+      <span className="sr-only">Toggle theme</span>
+    </Button>
+  );
+}
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -20,111 +64,50 @@ export function AuthLayout({
   showBackButton = false,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100">
-      <div className="flex min-h-screen">
-        {/* Left Side - Form */}
-        <div className="flex-1 lg:flex-none lg:w-1/2 flex flex-col justify-center px-4 sm:px-6 lg:px-12">
-          <div className="mx-auto w-full max-w-md">
-            {/* Back Button */}
-            {showBackButton && (
-              <div className="mb-8">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="text-slate-600 hover:text-slate-800 hover:bg-blue-50"
-                >
-                  <Link href="/">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Home
-                  </Link>
-                </Button>
-              </div>
-            )}
-
-            {/* Logo */}
-            <div className="flex items-center mb-8">
-              <div className="w-10 h-10 bg-blue-100 backdrop-blur-sm rounded-xl flex items-center justify-center border border-blue-200">
-                <Brain className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-3">
-                <h1 className="text-2xl font-bold text-slate-800">PureVibe</h1>
-                <p className="text-sm text-slate-600">
-                  AI-Powered Requirements Refinement
-                </p>
-              </div>
-            </div>
-
-            {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-slate-800 mb-2">
-                {title}
-              </h2>
-              <p className="text-slate-600">{subtitle}</p>
-            </div>
-
-            {/* Form */}
-            {children}
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 transition-colors duration-300 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Back Button */}
+        {showBackButton && (
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-slate-600 hover:text-slate-800 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+            >
+              <Link href="/">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Link>
+            </Button>
           </div>
-        </div>
-
-        {/* Right Side - Visual */}
-        <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-12">
-          <div className="max-w-lg mx-auto">
-            {/* Main Card */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-blue-100 shadow-xl mb-8">
-              <div className="text-center text-slate-800 mb-8">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Target className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4">
-                  What our Product Teams Said.
-                </h3>
-                <blockquote className="text-lg text-slate-700 mb-6">
-                  "Refining product requirements is now easier than ever. Just
-                  describe your idea and our AI agents handle the rest."
-                </blockquote>
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-full"></div>
-                  <div className="text-left">
-                    <div className="font-semibold">Sarah Chen</div>
-                    <div className="text-sm text-slate-500">
-                      Product Manager at TechCorp
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Navigation dots */}
-              <div className="flex justify-center gap-2 mb-6">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div className="w-2 h-2 bg-blue-200 rounded-full"></div>
-                <div className="w-2 h-2 bg-blue-200 rounded-full"></div>
-              </div>
+        )}
+        {/* Logo */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-blue-100 backdrop-blur-sm rounded-xl flex items-center justify-center border border-blue-200 dark:bg-gray-800 dark:border-gray-700">
+              <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-
-            {/* Bottom Card */}
-            <div className="bg-blue-50/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100">
-              <h4 className="text-slate-800 font-semibold mb-2">
-                Get your requirements refined and ready to ship now
-              </h4>
-              <p className="text-slate-600 text-sm mb-4">
-                Be among the first teams to experience the easiest way to refine
-                product requirements.
+            <div className="ml-3">
+              <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
+                PureVibe
+              </h1>
+              <p className="text-sm text-slate-600 dark:text-gray-300">
+                AI-Powered Requirements Refinement
               </p>
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-full border-2 border-white"></div>
-                  <div className="w-6 h-6 bg-gradient-to-br from-indigo-300 to-purple-400 rounded-full border-2 border-white"></div>
-                  <div className="w-6 h-6 bg-gradient-to-br from-teal-300 to-blue-400 rounded-full border-2 border-white"></div>
-                </div>
-                <span className="text-slate-600 text-sm">
-                  Join 500+ product teams
-                </span>
-              </div>
             </div>
           </div>
+          <ThemeToggle />
         </div>
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-bold text-slate-800 mb-2 dark:text-white">
+            {title}
+          </h2>
+          <p className="text-slate-600 dark:text-gray-300">{subtitle}</p>
+        </div>
+        {/* Form */}
+        {children}
       </div>
     </div>
   );
