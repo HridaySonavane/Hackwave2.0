@@ -188,7 +188,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] dark:bg-gradient-to-b dark:from-gray-900/75 dark:to-gray-950 p-10">
+    <div className="h-screen bg-white dark:bg-gradient-to-b dark:from-gray-900/75 dark:to-gray-950 p-10">
       {/* <DashboardHeader userId={userId} /> */}
       <DashboardWindow />
     </div>

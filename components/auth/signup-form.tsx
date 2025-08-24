@@ -188,7 +188,7 @@ export function SignUpForm() {
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">
-              Welcome to RequireAI!
+              Welcome to PureVibe!
             </h3>
             <p className="text-white/80 mb-8">
               Your account has been created successfully. You can now start
