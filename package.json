@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "socket": "node socket-server.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run socket\""
+    "python-socket": "python python-socket-server.py",
+    "dev:all": "concurrently \"npm run dev\" \"npm run socket\"",
+    "dev:python": "concurrently \"npm run dev\" \"npm run python-socket\""
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",

@@ -33,7 +33,6 @@ type ManagerFlow {
 type ClarifierDoc {
   question String
   answer   String
-  note     String?
 }
 
 type Product {
@@ -43,7 +42,7 @@ type Product {
 }
 
 type Features {
-  featureNumber   Int
+  name   String
   reason     String
   goal_oriented Float
   development_time String

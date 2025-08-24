@@ -8,11 +8,6 @@ import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, FileText, Sparkles, Plus } from "lucide-react";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { QuickStats } from "@/components/dashboard/quick-stats";
-import { RecentResumes } from "@/components/dashboard/recent-resumes";
-import { UsageOverview } from "@/components/dashboard/usage-overview";
-import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { supabase } from "@/lib/supabase/auth";
 import { User } from "@supabase/auth-helpers-nextjs";
 import DashboardWindow from "@/components/dashboard/dashboard-window";
@@ -82,11 +77,11 @@ export default function DashboardPage() {
       }
 
       // If coming from successful checkout, sync the subscription
-      if (success === "true" && sessionId) {
-        syncSubscription(sessionId);
-      } else {
-        loadDashboardData();
-      }
+      //   if (success === "true" && sessionId) {
+      //     syncSubscription(sessionId);
+      //   } else {
+      //     loadDashboardData();
+      //   }
     } else {
       setLoading(false);
     }
@@ -94,61 +89,61 @@ export default function DashboardPage() {
     // }
   }, [user, userId, success, sessionId, router]);
 
-  const syncSubscription = async (sessionId: string) => {
-    setSyncing(true);
-    try {
-      const response = await fetch("/api/stripe/sync-subscription", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ sessionId }),
-      });
+  //   const syncSubscription = async (sessionId: string) => {
+  //     setSyncing(true);
+  //     try {
+  //       const response = await fetch("/api/stripe/sync-subscription", {
+  //         method: "POST",
+  //         credentials: "include",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ sessionId }),
+  //       });
 
-      if (response.ok) {
-        await loadDashboardData();
-      } else {
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Failed to sync subscription:", error);
-      setLoading(false);
-    } finally {
-      setSyncing(false);
-    }
-  };
+  //       if (response.ok) {
+  //         await loadDashboardData();
+  //       } else {
+  //         setLoading(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to sync subscription:", error);
+  //       setLoading(false);
+  //     } finally {
+  //       setSyncing(false);
+  //     }
+  //   };
 
-  const loadDashboardData = async () => {
-    try {
-      const subscriptionPromise = await fetch(
-        "/api/stripe/check-subscription",
-        {
-          credentials: "include",
-        }
-      ).catch(() => null);
-      const usagePromise = await fetch("/api/usage/current").catch(() => null);
+  //   const loadDashboardData = async () => {
+  //     try {
+  //       const subscriptionPromise = await fetch(
+  //         "/api/stripe/check-subscription",
+  //         {
+  //           credentials: "include",
+  //         }
+  //       ).catch(() => null);
+  //       const usagePromise = await fetch("/api/usage/current").catch(() => null);
 
-      const [subscriptionResponse, usageResponse] = await Promise.all([
-        subscriptionPromise,
-        usagePromise,
-      ]);
+  //       const [subscriptionResponse, usageResponse] = await Promise.all([
+  //         subscriptionPromise,
+  //         usagePromise,
+  //       ]);
 
-      if (subscriptionResponse && subscriptionResponse.ok) {
-        const subscriptionData = await subscriptionResponse.json();
-        setSubscription(subscriptionData.subscription);
-      }
+  //       if (subscriptionResponse && subscriptionResponse.ok) {
+  //         const subscriptionData = await subscriptionResponse.json();
+  //         setSubscription(subscriptionData.subscription);
+  //       }
 
-      if (usageResponse && usageResponse.ok) {
-        const usageData = await usageResponse.json();
-        setUsage(usageData);
-      }
-    } catch (error) {
-      console.error("Failed to load dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //       if (usageResponse && usageResponse.ok) {
+  //         const usageData = await usageResponse.json();
+  //         setUsage(usageData);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to load dashboard data:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
   if (syncing) {
     return (

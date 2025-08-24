@@ -3,141 +3,129 @@
 import type React from "react";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Brain, Target } from "lucide-react";
 import Link from "next/link";
 
 interface AuthLayoutProps {
-	children: React.ReactNode;
-	title: string;
-	subtitle: string;
-	showBackButton?: boolean;
+  children: React.ReactNode;
+  title: string;
+  subtitle: string;
+  showBackButton?: boolean;
 }
 
 export function AuthLayout({
-	children,
-	title,
-	subtitle,
-	showBackButton = false,
+  children,
+  title,
+  subtitle,
+  showBackButton = false,
 }: AuthLayoutProps) {
-	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-			<div className="flex min-h-screen dark:bg-gray-950">
-				{/* Left Side - Form */}
-				<div className="flex-1/3 flex flex-col justify-center px-4 sm:px-6 lg:px-8">
-					<div className="mx-auto w-full max-w-md">
-						{/* Back Button */}
-						{showBackButton && (
-							<div className="my-8">
-								<Button variant="ghost" size="sm" asChild>
-									<Link href="/">
-										<ArrowLeft className="w-4 h-4 mr-2" />
-										Back to Home
-									</Link>
-								</Button>
-							</div>
-						)}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100">
+      <div className="flex min-h-screen">
+        {/* Left Side - Form */}
+        <div className="flex-1 lg:flex-none lg:w-1/2 flex flex-col justify-center px-4 sm:px-6 lg:px-12">
+          <div className="mx-auto w-full max-w-md">
+            {/* Back Button */}
+            {showBackButton && (
+              <div className="mb-8">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="text-slate-600 hover:text-slate-800 hover:bg-blue-50"
+                >
+                  <Link href="/">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Home
+                  </Link>
+                </Button>
+              </div>
+            )}
 
-						{/* Logo */}
-						<div className="flex items-center mb-8">
-							<div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-								<span className="text-white font-bold text-lg">
-									AI
-								</span>
-							</div>
-							<div className="ml-3">
-								<h1 className="text-2xl font-bold text-gray-900 dark:text-gray-300">
-									ResumeAI
-								</h1>
-								<p className="text-sm text-gray-500 dark:text-gray-400">
-									AI-Powered Resume Builder
-								</p>
-							</div>
-						</div>
+            {/* Logo */}
+            <div className="flex items-center mb-8">
+              <div className="w-10 h-10 bg-blue-100 backdrop-blur-sm rounded-xl flex items-center justify-center border border-blue-200">
+                <Brain className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="ml-3">
+                <h1 className="text-2xl font-bold text-slate-800">RequireAI</h1>
+                <p className="text-sm text-slate-600">
+                  AI-Powered Requirements Refinement
+                </p>
+              </div>
+            </div>
 
-						{/* Header */}
-						<div className="mb-8 dark:bg-gray-950">
-							<h2 className="text-3xl font-bold text-gray-900 dark:text-gray-300 mb-2">
-								{title}
-							</h2>
-							<p className="text-gray-600 dark:text-gray-400">
-								{subtitle}
-							</p>
-						</div>
+            {/* Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                {title}
+              </h2>
+              <p className="text-slate-600">{subtitle}</p>
+            </div>
 
-						{/* Form */}
-						{children}
-					</div>
-				</div>
+            {/* Form */}
+            {children}
+          </div>
+        </div>
 
-				{/* Right Side - Visual */}
-				<div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-8 bg-gradient-to-br from-blue-600 to-purple-700 rounded-l-4xl">
-					<div className="max-w-md mx-auto text-center text-white">
-						{/* Floating Elements */}
-						<div className="relative mb-12">
-							<div className="absolute -top-4 -left-4 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
-							<div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
+        {/* Right Side - Visual */}
+        <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-12">
+          <div className="max-w-lg mx-auto">
+            {/* Main Card */}
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-blue-100 shadow-xl mb-8">
+              <div className="text-center text-slate-800 mb-8">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Target className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">
+                  What our Product Teams Said.
+                </h3>
+                <blockquote className="text-lg text-slate-700 mb-6">
+                  "Refining product requirements is now easier than ever. Just
+                  describe your idea and our AI agents handle the rest."
+                </blockquote>
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-full"></div>
+                  <div className="text-left">
+                    <div className="font-semibold">Sarah Chen</div>
+                    <div className="text-sm text-slate-500">
+                      Product Manager at TechCorp
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-							{/* Main Visual */}
-							<div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-								<div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-									<Sparkles className="w-8 h-8 text-white" />
-								</div>
-								<h3 className="text-2xl font-bold mb-4">
-									AI-Powered Resume Builder
-								</h3>
-								<p className="text-white/80 leading-relaxed">
-									Create professional, ATS-optimized resumes
-									in minutes with our advanced AI technology.
-								</p>
-							</div>
-						</div>
+              {/* Navigation dots */}
+              <div className="flex justify-center gap-2 mb-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-200 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-200 rounded-full"></div>
+              </div>
+            </div>
 
-						{/* Stats */}
-						<div className="my-12 grid grid-cols-2 gap-8">
-							<div>
-								<div className="text-3xl font-bold">50K+</div>
-								<div className="text-white/80 text-sm">
-									Resumes Created
-								</div>
-							</div>
-							<div>
-								<div className="text-3xl font-bold">4.9/5</div>
-								<div className="text-white/80 text-sm">
-									User Rating
-								</div>
-							</div>
-						</div>
-
-						{/* Features */}
-						<div className="space-y-6">
-							<div className="flex items-center gap-4">
-								<div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-									<span className="text-sm font-bold">✓</span>
-								</div>
-								<span className="text-left">
-									50+ Professional Templates
-								</span>
-							</div>
-							<div className="flex items-center gap-4">
-								<div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-									<span className="text-sm font-bold">✓</span>
-								</div>
-								<span className="text-left">
-									AI-Powered Content Optimization
-								</span>
-							</div>
-							<div className="flex items-center gap-4">
-								<div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-									<span className="text-sm font-bold">✓</span>
-								</div>
-								<span className="text-left">
-									95% ATS Compatibility Rate
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+            {/* Bottom Card */}
+            <div className="bg-blue-50/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100">
+              <h4 className="text-slate-800 font-semibold mb-2">
+                Get your requirements refined and ready to ship now
+              </h4>
+              <p className="text-slate-600 text-sm mb-4">
+                Be among the first teams to experience the easiest way to refine
+                product requirements.
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  <div className="w-6 h-6 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-full border-2 border-white"></div>
+                  <div className="w-6 h-6 bg-gradient-to-br from-indigo-300 to-purple-400 rounded-full border-2 border-white"></div>
+                  <div className="w-6 h-6 bg-gradient-to-br from-teal-300 to-blue-400 rounded-full border-2 border-white"></div>
+                </div>
+                <span className="text-slate-600 text-sm">
+                  Join 500+ product teams
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
