@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 import {
   ArrowRight,
   Brain,
@@ -57,9 +58,21 @@ export default function HomePage() {
         <div className="flex items-center gap-4">
           <Search className="w-5 h-5 text-gray-600" />
           <ShoppingBag className="w-5 h-5 text-gray-600" />
-          <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6 text-sm">
-            Try Now
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link href="/auth/signin">
+              <Button
+                variant="outline"
+                className="rounded-full px-6 text-sm border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+              >
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/auth/signup">
+              <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6 text-sm">
+                Sign Up
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -72,7 +85,7 @@ export default function HomePage() {
                   Trending AI Solutions
                 </p>
                 <h1 className="text-5xl lg:text-6xl font-black leading-tight text-gray-900">
-                  REQUIREAI
+                  PUREVIBE
                   <br />
                   <span className="text-4xl lg:text-5xl">MULTI-AGENT</span>
                 </h1>
@@ -326,7 +339,7 @@ export default function HomePage() {
                   Ready to Transform Your Requirements?
                 </h2>
                 <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                  Join leading product teams who use RequireAI to build better
+                  Join leading product teams who use PureVibe to build better
                   products faster.
                 </p>
 

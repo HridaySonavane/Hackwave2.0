@@ -48,7 +48,7 @@ export function AuthLayout({
                 <Brain className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-3">
-                <h1 className="text-2xl font-bold text-slate-800">RequireAI</h1>
+                <h1 className="text-2xl font-bold text-slate-800">PureVibe</h1>
                 <p className="text-sm text-slate-600">
                   AI-Powered Requirements Refinement
                 </p>
