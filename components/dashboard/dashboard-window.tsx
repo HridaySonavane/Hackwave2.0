@@ -4,7 +4,9 @@ import DashboardSidebar from "./dashboard-sidebar";
 
 export default function DashboardWindow() {
   return (
-    <div className="w-full h-full bg-white rounded-md border-2 border-black grid grid-cols-18 gap-4 p-4">
+    <div className="w-full h-full bg-white rounded-md border-2 border-black grid grid-cols-18 gap-4">
+      {/* <div className="p-4">
+      </div> */}
       <div className="col-span-1">
         <DashboardSidebar />
       </div>
