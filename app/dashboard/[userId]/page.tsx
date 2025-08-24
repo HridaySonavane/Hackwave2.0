@@ -19,187 +19,183 @@ import DashboardWindow from "@/components/dashboard/dashboard-window";
 // import { se } from "date-fns/locale";
 
 interface Subscription {
-	plan_id: string;
-	status: string;
-	current_period_end: string;
+  plan_id: string;
+  status: string;
+  current_period_end: string;
 }
 
 interface UsageData {
-	resumes_created: number;
-	downloads_used: number;
-	ai_optimizations_used: number;
+  resumes_created: number;
+  downloads_used: number;
+  ai_optimizations_used: number;
 }
 
 export default function DashboardPage() {
-	// const { user, loading: authLoading } = useAuth();
+  // const { user, loading: authLoading } = useAuth();
 
-	const searchParams = useSearchParams();
-	const params = useParams();
-	const router = useRouter();
-	const userId = params.userId as string;
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const router = useRouter();
+  const userId = params?.userId as string;
 
-	const [subscription, setSubscription] = useState<Subscription | null>(null);
-	const [usage, setUsage] = useState<UsageData>({
-		resumes_created: 0,
-		downloads_used: 0,
-		ai_optimizations_used: 0,
-	});
-	const [loading, setLoading] = useState(true);
-	const [syncing, setSyncing] = useState(false);
-	const [sessionId, setSessionId] = useState<any>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [usage, setUsage] = useState<UsageData>({
+    resumes_created: 0,
+    downloads_used: 0,
+    ai_optimizations_used: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [sessionId, setSessionId] = useState<any>(null);
 
-	const success = searchParams.get("success");
-	// const sessionId = searchParams.get("session_id");
+  const success = searchParams?.get("success");
+  // const sessionId = searchParams.get("session_id");
 
-	const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
-	useEffect(() => {
-		const fetchUser = async () => {
-			const { data, error } = await supabase.auth.getUser();
-			const user = data?.user;
-			setUser(user);
-		};
-		fetchUser();
-	}, []);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      const user = data?.user;
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
 
-	useEffect(() => {
-		const checkAuth = async () => {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession();
-			setSessionId(session?.user.id);
-		};
-		checkAuth();
-	}, []);
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setSessionId(session?.user.id);
+    };
+    checkAuth();
+  }, []);
 
-	useEffect(() => {
-		if (user) {
-			// Check if the userId matches the authenticated user
-			if (user.id !== userId) {
-				// Redirect to correct user dashboard
-				router.push(`/dashboard/${user.id}`);
-				return;
-			}
+  useEffect(() => {
+    if (user) {
+      // Check if the userId matches the authenticated user
+      if (user.id !== userId) {
+        // Redirect to correct user dashboard
+        router.push(`/dashboard/${user.id}`);
+        return;
+      }
 
-			// If coming from successful checkout, sync the subscription
-			if (success === "true" && sessionId) {
-				syncSubscription(sessionId);
-			} else {
-				loadDashboardData();
-			}
-		} else {
-			setLoading(false);
-		}
-		// if (!authLoading) {
-		// }
-	}, [user, userId, success, sessionId, router]);
+      // If coming from successful checkout, sync the subscription
+      if (success === "true" && sessionId) {
+        syncSubscription(sessionId);
+      } else {
+        loadDashboardData();
+      }
+    } else {
+      setLoading(false);
+    }
+    // if (!authLoading) {
+    // }
+  }, [user, userId, success, sessionId, router]);
 
-	const syncSubscription = async (sessionId: string) => {
-		setSyncing(true);
-		try {
-			const response = await fetch("/api/stripe/sync-subscription", {
-				method: "POST",
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ sessionId }),
-			});
+  const syncSubscription = async (sessionId: string) => {
+    setSyncing(true);
+    try {
+      const response = await fetch("/api/stripe/sync-subscription", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId }),
+      });
 
-			if (response.ok) {
-				await loadDashboardData();
-			} else {
-				setLoading(false);
-			}
-		} catch (error) {
-			console.error("Failed to sync subscription:", error);
-			setLoading(false);
-		} finally {
-			setSyncing(false);
-		}
-	};
+      if (response.ok) {
+        await loadDashboardData();
+      } else {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Failed to sync subscription:", error);
+      setLoading(false);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
-	const loadDashboardData = async () => {
-		try {
-			const subscriptionPromise = await fetch(
-				"/api/stripe/check-subscription",
-				{
-					credentials: "include",
-				}
-			).catch(() => null);
-			const usagePromise = await fetch("/api/usage/current").catch(
-				() => null
-			);
+  const loadDashboardData = async () => {
+    try {
+      const subscriptionPromise = await fetch(
+        "/api/stripe/check-subscription",
+        {
+          credentials: "include",
+        }
+      ).catch(() => null);
+      const usagePromise = await fetch("/api/usage/current").catch(() => null);
 
-			const [subscriptionResponse, usageResponse] = await Promise.all([
-				subscriptionPromise,
-				usagePromise,
-			]);
+      const [subscriptionResponse, usageResponse] = await Promise.all([
+        subscriptionPromise,
+        usagePromise,
+      ]);
 
-			if (subscriptionResponse && subscriptionResponse.ok) {
-				const subscriptionData = await subscriptionResponse.json();
-				setSubscription(subscriptionData.subscription);
-			}
+      if (subscriptionResponse && subscriptionResponse.ok) {
+        const subscriptionData = await subscriptionResponse.json();
+        setSubscription(subscriptionData.subscription);
+      }
 
-			if (usageResponse && usageResponse.ok) {
-				const usageData = await usageResponse.json();
-				setUsage(usageData);
-			}
-		} catch (error) {
-			console.error("Failed to load dashboard data:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
+      if (usageResponse && usageResponse.ok) {
+        const usageData = await usageResponse.json();
+        setUsage(usageData);
+      }
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-	if (syncing) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db]">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-					<p className="text-gray-600">
-						{syncing
-							? "Setting up your subscription..."
-							: "Loading..."}
-					</p>
-				</div>
-			</div>
-		);
-	}
+  if (syncing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">
+            {syncing ? "Setting up your subscription..." : "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-	if (!user) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] dark:bg-gray-950">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold text-gray-900 dark:text-gray-200 mb-4">
-						Authentication Required
-					</h1>
-					<p className="text-gray-600 dark:text-gray-400 mb-6">
-						Please sign in to access your dashboard.
-					</p>
-					<Button asChild>
-						<a href="/auth/signin">Sign In</a>
-					</Button>
-				</div>
-			</div>
-		);
-	}
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] dark:bg-gray-950">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-200 mb-4">
+            Authentication Required
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Please sign in to access your dashboard.
+          </p>
+          <Button asChild>
+            <a href="/auth/signin">Sign In</a>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-	if (loading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db]">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-					<p className="text-gray-600">Loading dashboard...</p>
-				</div>
-			</div>
-		);
-	}
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
-	return (
-		<div className="h-screen bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] dark:bg-gradient-to-b dark:from-gray-900/75 dark:to-gray-950 p-10">
-			{/* <DashboardHeader userId={userId} /> */}
-            <DashboardWindow />
-		</div>
-	);
+  return (
+    <div className="h-screen bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] dark:bg-gradient-to-b dark:from-gray-900/75 dark:to-gray-950 p-10">
+      {/* <DashboardHeader userId={userId} /> */}
+      <DashboardWindow />
+    </div>
+  );
 }
