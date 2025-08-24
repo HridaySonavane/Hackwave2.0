@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,10 +31,8 @@ export function SignInForm() {
     e.preventDefault();
     setIsLoading((prev) => ({ ...prev, email: true }));
     setError("");
-
     try {
       await authService.signIn(formData.email, formData.password);
-
       // Poll for session hydration (up to 2 seconds)
       let sessionUser = null;
       for (let i = 0; i < 20; i++) {
@@ -49,26 +45,21 @@ export function SignInForm() {
         }
         await new Promise((res) => setTimeout(res, 100));
       }
-
       console.log("Signed in user:", sessionUser);
-
       if (!sessionUser) {
         setError("Session not established. Please try again.");
         return;
       }
-
       // Fetch the user's profile to get the real role
       const { data: profile, error } = await supabase
         .from("user_profiles")
         .select("*")
         .eq("id", sessionUser.id)
         .single();
-
       if (error || !profile) {
         setError("Could not fetch user profile.");
         return;
       }
-
       if (profile.role === "admin") {
         window.location.href = "/admin";
       } else {
@@ -86,10 +77,8 @@ export function SignInForm() {
       setError("Please enter your email address");
       return;
     }
-
     setIsLoading((prev) => ({ ...prev, magic: true }));
     setError("");
-
     try {
       await authService.signInWithOTP(formData.email);
       setMagicLinkSent(true);
@@ -103,7 +92,6 @@ export function SignInForm() {
   const handleSocialSignIn = async (provider: "google" | "github") => {
     setIsLoading((prev) => ({ ...prev, [provider]: true }));
     setError("");
-
     try {
       // Implement social sign-in
       console.log(`Sign in with ${provider}`);
@@ -117,21 +105,22 @@ export function SignInForm() {
   if (magicLinkSent) {
     return (
       <div className="w-full max-w-md">
-        <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl">
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl dark:bg-gray-800/80 dark:border-gray-700">
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 dark:bg-blue-900/30">
+              <Mail className="w-8 h-8 text-white dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-white mb-2 dark:text-white">
               Check your email
             </h3>
-            <p className="text-white/80 mb-6">
-              We&apos;ve sent a magic link to <strong>{formData.email}</strong>
+            <p className="text-white/80 mb-6 dark:text-gray-300">
+              We&apos;ve sent a magic link to{" "}
+              <strong className="dark:text-white">{formData.email}</strong>
             </p>
             <Button
               variant="outline"
               onClick={() => setMagicLinkSent(false)}
-              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all rounded-full"
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all rounded-full dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
             >
               Back to sign in
             </Button>
@@ -149,7 +138,7 @@ export function SignInForm() {
           variant="outline"
           onClick={() => handleSocialSignIn("google")}
           disabled={Object.values(isLoading).some(Boolean)}
-          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl"
+          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
         >
           {isLoading.google ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -177,12 +166,11 @@ export function SignInForm() {
             </>
           )}
         </Button>
-
         <Button
           variant="outline"
           onClick={() => handleSocialSignIn("github")}
           disabled={Object.values(isLoading).some(Boolean)}
-          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl"
+          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
         >
           {isLoading.github ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -194,28 +182,29 @@ export function SignInForm() {
           )}
         </Button>
       </div>
-
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full border-white/20" />
+          <Separator className="w-full border-white/20 dark:border-gray-700" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 px-2 text-white/80">
+          <span className="bg-transparent px-2 text-black/60 dark:text-gray-400">
             Or continue with email
           </span>
         </div>
       </div>
-
       {/* Email Sign In Form */}
-      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl">
+      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl dark:bg-gray-800/80 dark:border-gray-700">
         <CardContent className="p-8">
           <form onSubmit={handleEmailSignIn} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white">
+              <Label
+                htmlFor="email"
+                className="text-black/60 dark:text-gray-300"
+              >
                 Email address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black/60 w-4 h-4 dark:text-gray-400" />
                 <Input
                   id="email"
                   type="email"
@@ -227,18 +216,20 @@ export function SignInForm() {
                       email: e.target.value,
                     }))
                   }
-                  className="pl-10 bg-black/40 border-white/20 text-white placeholder:text-white/60 rounded-xl"
+                  className="pl-10 bg-blue-50 border-white/20 text-black placeholder:text-black/60 rounded-xl dark:bg-gray-700/50 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                   required
                 />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white">
+              <Label
+                htmlFor="password"
+                className="text-black/60 dark:text-gray-300"
+              >
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black/60 w-4 h-4 dark:text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -250,14 +241,14 @@ export function SignInForm() {
                       password: e.target.value,
                     }))
                   }
-                  className="pl-10 pr-10 bg-black/40 border-white/20 text-white placeholder:text-white/60 rounded-xl"
+                  className="pl-10 pr-10 bg-blue-50 border-white/20 text-black placeholder:text-black/60 rounded-xl dark:bg-gray-700/50 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                   required
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/60 hover:text-white"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-black/60 hover:text-black dark:text-gray-400 dark:hover:text-gray-200"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -268,38 +259,38 @@ export function SignInForm() {
                 </Button>
               </div>
             </div>
-
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <input
                   id="remember"
                   type="checkbox"
-                  className="w-4 h-4 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                 />
-                <Label htmlFor="remember" className="text-sm text-white/80">
+                <Label
+                  htmlFor="remember"
+                  className="text-sm text-black/80 dark:text-gray-300"
+                >
                   Remember me
                 </Label>
               </div>
               <Link
                 href="/auth/forgot-password"
-                className="text-sm text-blue-300 hover:text-blue-200 hover:underline"
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Forgot password?
               </Link>
             </div>
-
             {error && (
               <Alert
                 variant="destructive"
-                className="bg-red-500/20 border-red-500/30 text-white"
+                className="bg-red-500/20 border-red-500/30 text-white dark:bg-red-900/30 dark:border-red-800"
               >
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full font-medium"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-full font-medium dark:from-blue-600 dark:to-blue-800"
               disabled={isLoading.email}
             >
               {isLoading.email ? (
@@ -311,11 +302,10 @@ export function SignInForm() {
                 "Sign in"
               )}
             </Button>
-
             <Button
               type="button"
               variant="outline"
-              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all rounded-full"
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-black/90 hover:bg-white/20 transition-all rounded-full dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
               onClick={handleMagicLink}
               disabled={isLoading.magic || !formData.email}
             >
@@ -334,13 +324,14 @@ export function SignInForm() {
           </form>
         </CardContent>
       </Card>
-
       {/* Sign Up Link */}
       <div className="text-center mb-8">
-        <span className="text-white/80">Don&apos;t have an account? </span>
+        <span className="text-black/80 dark:text-gray-300">
+          Don&apos;t have an account?{" "}
+        </span>
         <Link
           href="/auth/signup"
-          className="text-blue-300 hover:text-blue-200 hover:underline font-medium"
+          className="text-blue-600 hover:text-blue-800 hover:underline font-medium dark:text-blue-400 dark:hover:text-blue-300"
         >
           Sign up for free
         </Link>
