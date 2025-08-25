@@ -1,9 +1,14 @@
 import json
 import asyncio
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import List
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, WebSocketState
+from typing import List, Optional
 from langchain_core.messages import HumanMessage
 import uvicorn
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import your agent modules here
@@ -23,10 +28,11 @@ app = FastAPI()
 # Add CORS middleware to match your JavaScript client
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # Your Next.js and Socket.IO ports
+    allow_origins=["*"],  # Allow all origins for WebSocket connections
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # --- Connection Manager ---
@@ -34,10 +40,33 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
         self.rooms = {}  # room_id -> list of websockets
+        self.max_connections = 100  # Increased maximum concurrent connections
+        self.connection_timeout = 120  # 2 minutes timeout for inactive connections
+        self.last_activity = {}  # Track last activity for each connection
+        self.cleanup_task = None
+
+    async def start_cleanup_task(self):
+        if self.cleanup_task is None:
+            self.cleanup_task = asyncio.create_task(self.periodic_cleanup())
+    
+    async def periodic_cleanup(self):
+        while True:
+            await self.cleanup_inactive_connections()
+            await asyncio.sleep(30)  # Run cleanup every 30 seconds
 
     async def connect(self, websocket: WebSocket, room_id: str = "default"):
+        await self.start_cleanup_task()
+        
+        # Clean up inactive connections before checking max limit
+        await self.cleanup_inactive_connections()
+        
+        if len(self.active_connections) >= self.max_connections:
+            await websocket.close(code=1008, reason="Server at maximum capacity")
+            return
+            
         await websocket.accept()
         self.active_connections.append(websocket)
+        self.last_activity[id(websocket)] = asyncio.get_event_loop().time()
         
         print(f"Connected websocket: {id(websocket)} to room: {room_id}")
         print(f"Active connections: {len(self.active_connections)}")
@@ -78,40 +107,77 @@ class ConnectionManager:
         }, room_id, exclude_websocket=websocket)
 
     def disconnect(self, websocket: WebSocket):
-        print(f"Disconnecting websocket: {id(websocket)}")
-        
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
-            print(f"Removed from active connections. Active: {len(self.active_connections)}")
-        
-        # Remove from all rooms
-        for room_id, connections in self.rooms.items():
-            if websocket in connections:
-                connections.remove(websocket)
-                print(f"Removed from room: {room_id}")
-                # Don't broadcast user left after disconnect to avoid ASGI errors
-
-    async def send_personal_message(self, message: dict, websocket: WebSocket):
-        # Simple check if websocket is in active connections
-        if websocket not in self.active_connections:
-            print(f"WebSocket {id(websocket)} not in active connections, skipping message")
-            return
-        
-        print(f"Sending message to websocket: {id(websocket)}")
-        
         try:
-            await websocket.send_text(json.dumps(message))
-            print(f"Message sent successfully to websocket: {id(websocket)}")
-            return True
-        except Exception as e:
-            print(f"Error sending message to websocket {id(websocket)}: {e}")
-            # Remove websocket on any error
+            logger.info(f"Disconnecting websocket: {id(websocket)}")
+            
             if websocket in self.active_connections:
                 self.active_connections.remove(websocket)
-            # Also remove from rooms
+                # Remove from last activity tracking
+                if id(websocket) in self.last_activity:
+                    del self.last_activity[id(websocket)]
+                logger.info(f"Removed from active connections. Active: {len(self.active_connections)}")
+            
+            # Remove from all rooms
             for room_id, connections in self.rooms.items():
                 if websocket in connections:
                     connections.remove(websocket)
+                    logger.info(f"Removed from room: {room_id}")
+            
+            # Try to close the websocket if it's still open
+            if isinstance(websocket, WebSocket) and websocket.client_state != WebSocketState.DISCONNECTED:
+                asyncio.create_task(websocket.close(code=1000, reason="Normal closure"))
+                
+        except Exception as e:
+            logger.error(f"Error during disconnect: {str(e)}")
+            # Ensure connection is removed even if there's an error
+            if websocket in self.active_connections:
+                self.active_connections.remove(websocket)
+                print(f"Removed from room: {room_id}")
+                # Don't broadcast user left after disconnect to avoid ASGI errors
+
+    async def cleanup_inactive_connections(self):
+        current_time = asyncio.get_event_loop().time()
+        for websocket in self.active_connections[:]:  # Create a copy to avoid modification during iteration
+            if id(websocket) in self.last_activity:
+                if current_time - self.last_activity[id(websocket)] > self.connection_timeout:
+                    try:
+                        await websocket.close(code=1000, reason="Connection timeout")
+                    except Exception as e:
+                        print(f"Error closing connection: {e}")
+                    finally:
+                        self.disconnect(websocket)
+
+    async def send_personal_message(self, message: dict, websocket: WebSocket):
+        if not websocket or websocket not in self.active_connections:
+            logger.warning(f"WebSocket {id(websocket)} not in active connections, skipping message")
+            return False
+            
+        if not message:
+            logger.error("Attempted to send empty message")
+            return False
+            
+        # Update last activity time
+        self.last_activity[id(websocket)] = asyncio.get_event_loop().time()
+        
+        # Cleanup inactive connections periodically
+        await self.cleanup_inactive_connections()
+        
+        try:
+            # Check if websocket is still open
+            if isinstance(websocket, WebSocket) and websocket.client_state != WebSocketState.DISCONNECTED:
+                logger.info(f"Sending message to websocket: {id(websocket)}")
+                await websocket.send_text(json.dumps(message))
+                logger.info(f"Message sent successfully to websocket: {id(websocket)}")
+                return True
+            else:
+                logger.warning(f"WebSocket {id(websocket)} is disconnected, removing from active connections")
+                self.disconnect(websocket)
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending message to websocket {id(websocket)}: {str(e)}")
+            # Remove websocket on any error
+            self.disconnect(websocket)
             return False
 
     async def broadcast_to_room(self, message: dict, room_id: str, exclude_websocket: WebSocket = None):
@@ -149,7 +215,6 @@ manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket, f"client_{client_id}")
     try:
-        
         await manager.broadcast_to_room({
             "type": "receive-message",
             "data": {
@@ -159,8 +224,42 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 "timestamp": asyncio.get_event_loop().time()
             }
         }, f"client_{client_id}")
-        
-        await run_conversation(websocket, client_id)
+
+        while True:
+            try:
+                data = await websocket.receive_json()
+                print(f"Received message from client {client_id}:", data)
+                
+                if "prompt" in data:
+                    # Handle prompt message
+                    await manager.send_personal_message({
+                        "type": "status",
+                        "data": {"message": "Processing your prompt..."}
+                    }, websocket)
+                    await run_conversation(websocket, client_id)
+                
+                elif "answer" in data:
+                    # Handle answer message
+                    answer = data["answer"]
+                    await manager.send_personal_message({
+                        "type": "status",
+                        "data": {"message": f"Processing your answer: {answer}"}
+                    }, websocket)
+                    await run_conversation(websocket, client_id)
+                
+                else:
+                    await manager.send_personal_message({
+                        "type": "error",
+                        "data": {"message": "Invalid message format"}
+                    }, websocket)
+                
+            except json.JSONDecodeError:
+                await manager.send_personal_message({
+                    "type": "error",
+                    "data": {"message": "Invalid JSON format"}
+                }, websocket)
+                continue
+                
     except WebSocketDisconnect:
         print(f"WebSocket disconnected for client {client_id}")
         manager.disconnect(websocket)

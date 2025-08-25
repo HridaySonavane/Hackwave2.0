@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-
 import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,10 +79,8 @@ export function SignUpForm() {
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     setIsLoading((prev) => ({ ...prev, email: true }));
     setError("");
-
     try {
       // Check if there's an existing session and clear it if user doesn't exist
       const {
@@ -98,7 +94,6 @@ export function SignUpForm() {
             .select("id")
             .eq("id", session.user.id)
             .single();
-
           // If user doesn't exist in database, clear the session
           if (error || !user) {
             await supabase.auth.signOut();
@@ -110,7 +105,6 @@ export function SignUpForm() {
           console.log("Cleared session due to error checking user");
         }
       }
-
       // Proceed with signup
       const { user } = await authService.signUp(
         formData.email,
@@ -121,7 +115,6 @@ export function SignUpForm() {
           role: formData.role,
         }
       );
-
       // Insert user profile row after successful sign up
       if (user) {
         const { data: existingProfile } = await supabase
@@ -138,7 +131,6 @@ export function SignUpForm() {
           });
         }
       }
-
       setStep("otp");
     } catch (err: any) {
       setError(err.message || "Failed to create account");
@@ -150,7 +142,6 @@ export function SignUpForm() {
   const handleSocialSignUp = async (provider: "google" | "github") => {
     setIsLoading((prev) => ({ ...prev, [provider]: true }));
     setError("");
-
     try {
       // Implement social sign-up
       console.log(`Sign up with ${provider}`);
@@ -182,21 +173,21 @@ export function SignUpForm() {
   if (step === "success") {
     return (
       <div className="w-full max-w-md">
-        <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl">
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl dark:bg-gray-800/80 dark:border-gray-700">
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 dark:bg-green-900/30">
+              <CheckCircle className="w-8 h-8 text-green-400 dark:text-green-400" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">
+            <h3 className="text-2xl font-bold text-white mb-2 dark:text-white">
               Welcome to PureVibe!
             </h3>
-            <p className="text-white/80 mb-8">
+            <p className="text-white/80 mb-8 dark:text-gray-300">
               Your account has been created successfully. You can now start
               refining your product requirements with AI-powered multi-agent
               assistance.
             </p>
             <Button
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full font-medium"
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full font-medium dark:from-blue-600 dark:to-cyan-600"
               onClick={() => (window.location.href = "/dashboard")}
             >
               Go to Dashboard
@@ -208,15 +199,21 @@ export function SignUpForm() {
   }
 
   const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 2) return "bg-red-500";
-    if (passwordStrength <= 3) return "bg-yellow-500";
-    return "bg-green-500";
+    if (passwordStrength <= 2) return "bg-red-500 dark:bg-red-500";
+    if (passwordStrength <= 3) return "bg-yellow-500 dark:bg-yellow-500";
+    return "bg-green-500 dark:bg-green-500";
   };
 
   const getPasswordStrengthText = () => {
     if (passwordStrength <= 2) return "Weak";
     if (passwordStrength <= 3) return "Medium";
     return "Strong";
+  };
+
+  const getPasswordStrengthTextColor = () => {
+    if (passwordStrength <= 2) return "text-red-400 dark:text-red-400";
+    if (passwordStrength <= 3) return "text-yellow-400 dark:text-yellow-400";
+    return "text-green-400 dark:text-green-400";
   };
 
   return (
@@ -227,7 +224,7 @@ export function SignUpForm() {
           variant="outline"
           onClick={() => handleSocialSignUp("google")}
           disabled={Object.values(isLoading).some(Boolean)}
-          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl"
+          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
         >
           {isLoading.google ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -255,12 +252,11 @@ export function SignUpForm() {
             </>
           )}
         </Button>
-
         <Button
           variant="outline"
           onClick={() => handleSocialSignUp("github")}
           disabled={Object.values(isLoading).some(Boolean)}
-          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl"
+          className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-all rounded-xl dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
         >
           {isLoading.github ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -272,24 +268,25 @@ export function SignUpForm() {
           )}
         </Button>
       </div>
-
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full border-white/20" />
+          <Separator className="w-full border-white/20 dark:border-gray-700" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-transparent px-2 text-black/80">
+          <span className="bg-transparent px-2 text-black/80 dark:text-gray-400">
             Or create account with email
           </span>
         </div>
       </div>
-
       {/* Email Sign Up Form */}
-      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl">
+      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl dark:bg-gray-800/80 dark:border-gray-700">
         <CardContent className="p-8">
           <form onSubmit={handleEmailSignUp} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-black/60">
+              <Label
+                htmlFor="fullName"
+                className="text-black/60 dark:text-gray-300"
+              >
                 Full name
               </Label>
               <div className="relative">
@@ -304,14 +301,16 @@ export function SignUpForm() {
                       fullName: e.target.value,
                     }))
                   }
-                  className="pl-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl"
+                  className="pl-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl dark:bg-gray-700/50 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                   required
                 />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-black/60">
+              <Label
+                htmlFor="email"
+                className="text-black/60 dark:text-gray-300"
+              >
                 Email address
               </Label>
               <div className="relative">
@@ -326,14 +325,16 @@ export function SignUpForm() {
                       email: e.target.value,
                     }))
                   }
-                  className="pl-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl"
+                  className="pl-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl dark:bg-gray-700/50 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                   required
                 />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-black/60">
+              <Label
+                htmlFor="password"
+                className="text-black/60 dark:text-gray-300"
+              >
                 Password
               </Label>
               <div className="relative">
@@ -343,7 +344,7 @@ export function SignUpForm() {
                   placeholder="Create a strong password"
                   value={formData.password}
                   onChange={(e) => handlePasswordChange(e.target.value)}
-                  className="pl-10 pr-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl"
+                  className="pl-10 pr-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl dark:bg-gray-700/50 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                   required
                   minLength={8}
                 />
@@ -351,7 +352,7 @@ export function SignUpForm() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/60 hover:text-white"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/60 hover:text-white dark:text-gray-400 dark:hover:text-gray-200"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -364,20 +365,16 @@ export function SignUpForm() {
               {formData.password && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/80">Password strength:</span>
+                    <span className="text-white/80 dark:text-gray-300">
+                      Password strength:
+                    </span>
                     <span
-                      className={`font-medium ${
-                        passwordStrength <= 2
-                          ? "text-red-400"
-                          : passwordStrength <= 3
-                          ? "text-yellow-400"
-                          : "text-green-400"
-                      }`}
+                      className={`font-medium ${getPasswordStrengthTextColor()}`}
                     >
                       {getPasswordStrengthText()}
                     </span>
                   </div>
-                  <div className="w-full bg-white/20 rounded-full h-1">
+                  <div className="w-full bg-white/20 rounded-full h-1 dark:bg-gray-700">
                     <div
                       className={`h-1 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
                       style={{
@@ -388,9 +385,11 @@ export function SignUpForm() {
                 </div>
               )}
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-black/60">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-black/60 dark:text-gray-300"
+              >
                 Confirm password
               </Label>
               <div className="relative">
@@ -405,14 +404,14 @@ export function SignUpForm() {
                       confirmPassword: e.target.value,
                     }))
                   }
-                  className="pl-10 pr-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl"
+                  className="pl-10 pr-10 bg-blue-50 border-white/20 text-black/80 placeholder:text-black/60 rounded-xl dark:bg-gray-700/50 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                   required
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/60 hover:text-white"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/60 hover:text-white dark:text-gray-400 dark:hover:text-gray-200"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -423,7 +422,6 @@ export function SignUpForm() {
                 </Button>
               </div>
             </div>
-
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -435,26 +433,28 @@ export function SignUpForm() {
                       agreeToTerms: !!checked,
                     }))
                   }
-                  className="border-black/30 data-[state=checked]:bg-blue-500"
+                  className="border-black/30 data-[state=checked]:bg-blue-500 dark:border-gray-600 dark:data-[state=checked]:bg-blue-600"
                 />
-                <Label htmlFor="agreeToTerms" className="text-sm text-black/80">
+                <Label
+                  htmlFor="agreeToTerms"
+                  className="text-sm text-black/80 dark:text-gray-300"
+                >
                   I agree to the{" "}
                   <Link
                     href="/terms"
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     Privacy Policy
                   </Link>
                 </Label>
               </div>
-
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="subscribeNewsletter"
@@ -465,30 +465,28 @@ export function SignUpForm() {
                       subscribeNewsletter: !!checked,
                     }))
                   }
-                  className="border-black/30 data-[state=checked]:bg-blue-500"
+                  className="border-black/30 data-[state=checked]:bg-blue-500 dark:border-gray-600 dark:data-[state=checked]:bg-blue-600"
                 />
                 <Label
                   htmlFor="subscribeNewsletter"
-                  className="text-sm text-black/80"
+                  className="text-sm text-black/80 dark:text-gray-300"
                 >
                   Send me tips and updates about AI-powered requirements
                   refinement
                 </Label>
               </div>
             </div>
-
             {error && (
               <Alert
                 variant="destructive"
-                className="bg-red-500/20 border-red-500/30 text-white"
+                className="bg-red-500/20 border-red-500/30 text-white dark:bg-red-900/30 dark:border-red-800"
               >
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full font-medium"
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full font-medium dark:from-blue-600 dark:to-cyan-600"
               disabled={isLoading.email}
             >
               {isLoading.email ? (
@@ -503,13 +501,14 @@ export function SignUpForm() {
           </form>
         </CardContent>
       </Card>
-
       {/* Sign In Link */}
       <div className="text-center mb-8">
-        <span className="text-black/80">Already have an account? </span>
+        <span className="text-black/80 dark:text-gray-300">
+          Already have an account?{" "}
+        </span>
         <Link
           href="/auth/signin"
-          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+          className="text-blue-600 hover:text-blue-800 hover:underline font-medium dark:text-blue-400 dark:hover:text-blue-300"
         >
           Sign in
         </Link>

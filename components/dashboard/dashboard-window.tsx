@@ -1,18 +1,14 @@
+// DashboardWindow.js
 "use client";
-
-import DashboardMain from "./dashboard-main";
-import DashboardIconBar from "./dashboard-icons";
+import DashboardSidebar from "./dashboard-sidebar";
+import DashboardContent from "./dashboard-content";
 
 export default function DashboardWindow() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] rounded-xl border-4 border-black p-6">
-      <div className="w-full h-full grid grid-cols-4">
-        <div className="col-span-1 bg-white rounded-l-md">
-          <DashboardIconBar />
-        </div>
-        <div className="col-span-3 bg-white p-4 rounded-r-md">
-          <DashboardMain />
-        </div>
+    <div className="w-full h-full bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-auto">
+      <div className="flex h-full">
+        <DashboardSidebar />
+        <DashboardContent />
       </div>
     </div>
   );

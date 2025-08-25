@@ -4,7 +4,7 @@ import { ArrowUpFromDot } from "lucide-react";
 
 export default function DashboardMain() {
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col overflow-scroll">
       {/* Top Header - Dark Blue */}
       <div className="h-16 bg-gradient-to-br from-[#e2ebf1] to-[#c9e0db] rounded-md mb-4 flex items-center px-4">
         <h1 className="text-black text-xl font-semibold">Project Name</h1>
